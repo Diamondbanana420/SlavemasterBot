@@ -292,6 +292,63 @@ async def logout(request: Request, response: Response):
 
 # ============== Moltbot Helpers ==============
 
+# Persistent paths for Node.js and clawdbot
+NODE_DIR = "/root/nodejs"
+CLAWDBOT_DIR = "/root/.clawdbot-bin"
+CLAWDBOT_WRAPPER = "/root/run_clawdbot.sh"
+
+def get_clawdbot_command():
+    """Get the path to clawdbot executable"""
+    # Try wrapper script first
+    if os.path.exists(CLAWDBOT_WRAPPER):
+        return CLAWDBOT_WRAPPER
+    # Try persistent location
+    if os.path.exists(f"{CLAWDBOT_DIR}/clawdbot"):
+        return f"{CLAWDBOT_DIR}/clawdbot"
+    if os.path.exists(f"{NODE_DIR}/bin/clawdbot"):
+        return f"{NODE_DIR}/bin/clawdbot"
+    # Try system path
+    import shutil
+    clawdbot_path = shutil.which("clawdbot")
+    if clawdbot_path:
+        return clawdbot_path
+    return None
+
+
+def ensure_moltbot_installed():
+    """Ensure Moltbot dependencies are installed"""
+    install_script = "/app/backend/install_moltbot_deps.sh"
+    
+    # Check if clawdbot is available
+    clawdbot_cmd = get_clawdbot_command()
+    if clawdbot_cmd:
+        logger.info(f"Clawdbot found at: {clawdbot_cmd}")
+        return True
+    
+    # Run installation script if available
+    if os.path.exists(install_script):
+        logger.info("Clawdbot not found, running installation script...")
+        try:
+            result = subprocess.run(
+                ["bash", install_script],
+                capture_output=True,
+                text=True,
+                timeout=300
+            )
+            if result.returncode == 0:
+                logger.info("Moltbot dependencies installed successfully")
+                return True
+            else:
+                logger.error(f"Installation failed: {result.stderr}")
+                return False
+        except Exception as e:
+            logger.error(f"Installation script error: {e}")
+            return False
+    
+    logger.error("Clawdbot not found and no installation script available")
+    return False
+
+
 def generate_token():
     """Generate a random gateway token"""
     return secrets.token_hex(32)
