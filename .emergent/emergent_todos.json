@@ -29,10 +29,10 @@
   },
   {
     "content": "Phase 2: End-to-end testing with Testing Agent",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Phase 2: All user stories covered in Development and testing",
-    "status": "pending"
+    "status": "completed"
   }
 ]
