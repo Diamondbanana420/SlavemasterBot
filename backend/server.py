@@ -552,14 +552,15 @@ async def root():
 
 @api_router.post("/moltbot/start", response_model=MoltbotStartResponse)
 async def start_moltbot(request: MoltbotStartRequest, req: Request):
-    """Start the Moltbot gateway with the provided API key (requires auth)"""
+    """Start the Moltbot gateway with Emergent provider (requires auth)"""
     user = await require_auth(req)
     
-    if request.provider not in ["anthropic", "openai"]:
-        raise HTTPException(status_code=400, detail="Invalid provider. Use 'anthropic' or 'openai'")
+    if request.provider not in ["emergent", "anthropic", "openai"]:
+        raise HTTPException(status_code=400, detail="Invalid provider. Use 'emergent', 'anthropic', or 'openai'")
     
-    if not request.apiKey or len(request.apiKey) < 10:
-        raise HTTPException(status_code=400, detail="Invalid API key")
+    # For non-emergent providers, API key is required
+    if request.provider in ["anthropic", "openai"] and (not request.apiKey or len(request.apiKey) < 10):
+        raise HTTPException(status_code=400, detail="API key required for anthropic/openai providers")
     
     # Check if Moltbot is already running by another user
     if check_gateway_running() and gateway_state["owner_user_id"] != user.user_id:
@@ -575,7 +576,7 @@ async def start_moltbot(request: MoltbotStartRequest, req: Request):
             ok=True,
             controlUrl="/api/moltbot/ui/",
             token=token,
-            message="Moltbot started successfully"
+            message="Moltbot started successfully with Emergent provider"
         )
     except HTTPException:
         raise
