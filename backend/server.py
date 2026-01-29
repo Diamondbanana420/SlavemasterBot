@@ -493,11 +493,11 @@ async def start_gateway_process(api_key: str, provider: str, owner_user_id: str)
         if not clawdbot_cmd:
             raise HTTPException(status_code=500, detail="Failed to find clawdbot after installation")
     
-    # Start the gateway with config file
+    # Start the gateway (reads from ~/.clawdbot/clawdbot.json automatically)
     logger.info(f"Starting Moltbot gateway on port {MOLTBOT_PORT} using {clawdbot_cmd}...")
     
     process = subprocess.Popen(
-        [clawdbot_cmd, "gateway", "--port", str(MOLTBOT_PORT), "--bind", "lan", "--token", token, "--allow-unconfigured", "--config", CONFIG_FILE],
+        [clawdbot_cmd, "gateway", "--port", str(MOLTBOT_PORT), "--bind", "lan", "--token", token, "--allow-unconfigured"],
         env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
