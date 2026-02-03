@@ -109,7 +109,8 @@ class SiteMonitor:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(f'https://{url}', timeout=30) as resp:
-                    content = await resp.text().lower()
+                    raw_content = await resp.text()
+                    content = raw_content.lower()
                     
                     signals = {
                         'has_ssl': url.startswith('https') or resp.url.scheme == 'https',
