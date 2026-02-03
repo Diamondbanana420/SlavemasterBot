@@ -1135,6 +1135,152 @@ async def get_status_checks():
     return status_checks
 
 
+# ============== Dropshipping Automation Endpoints ==============
+from dropship.system import get_system, DropshipSystem
+from dropship.models import Product, Competitor
+
+# Initialize dropship system
+dropship_system: DropshipSystem = None
+
+@api_router.get("/dropship/status")
+async def get_dropship_status():
+    """Get dropshipping system status"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return dropship_system.get_status()
+
+@api_router.post("/dropship/initialize")
+async def initialize_dropship():
+    """Initialize the dropshipping system"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return await dropship_system.initialize()
+
+@api_router.get("/dropship/site-audit")
+async def run_site_audit():
+    """Run a full site audit"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return await dropship_system.run_site_audit()
+
+@api_router.get("/dropship/competitors")
+async def check_competitors():
+    """Check all competitors"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return await dropship_system.check_competitors()
+
+@api_router.post("/dropship/competitors/add")
+async def add_competitor(name: str, url: str):
+    """Add a competitor to monitor"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    dropship_system.competitor_monitor.add_competitor(name, url)
+    return {"status": "added", "competitor": name, "url": url}
+
+@api_router.get("/dropship/reports/daily")
+async def get_daily_report():
+    """Get daily performance report"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return await dropship_system.get_daily_report()
+
+@api_router.get("/dropship/reports/weekly")
+async def get_weekly_report():
+    """Get weekly performance report"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return await dropship_system.get_weekly_report()
+
+@api_router.post("/dropship/pricing/analyze")
+async def analyze_pricing(products: List[dict]):
+    """Analyze pricing for products"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return await dropship_system.analyze_pricing(products)
+
+@api_router.post("/dropship/inventory/check")
+async def check_inventory(products: List[dict]):
+    """Check inventory levels"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return dropship_system.check_inventory(products)
+
+@api_router.post("/dropship/profit/calculate")
+async def calculate_profit(product: dict):
+    """Calculate profit margin for a product"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return dropship_system.calculate_profit(product)
+
+@api_router.post("/dropship/funnel/analyze")
+async def analyze_funnel(funnel_data: dict):
+    """Analyze conversion funnel"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return dropship_system.analyze_funnel(funnel_data)
+
+@api_router.get("/dropship/alerts")
+async def get_alerts(unacknowledged: bool = False, severity: str = None):
+    """Get system alerts"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return dropship_system.alerts.get_alerts(unacknowledged, severity)
+
+@api_router.post("/dropship/alerts/{alert_id}/acknowledge")
+async def acknowledge_alert(alert_id: str):
+    """Acknowledge an alert"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    success = dropship_system.alerts.acknowledge_alert(alert_id)
+    return {"acknowledged": success}
+
+@api_router.get("/dropship/scheduler/status")
+async def get_scheduler_status():
+    """Get scheduler status"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return dropship_system.scheduler.get_status()
+
+@api_router.post("/dropship/scheduler/start")
+async def start_scheduler():
+    """Start the automation scheduler"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return dropship_system.start_automation()
+
+@api_router.post("/dropship/scheduler/stop")
+async def stop_scheduler():
+    """Stop the automation scheduler"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return dropship_system.stop_automation()
+
+@api_router.post("/dropship/scheduler/run/{task_name}")
+async def run_task(task_name: str):
+    """Run a specific scheduled task"""
+    global dropship_system
+    if dropship_system is None:
+        dropship_system = get_system(db)
+    return await dropship_system.scheduler.run_task(task_name)
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
